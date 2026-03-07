@@ -1,0 +1,151 @@
+[
+    {
+        "id": "nav-dashboard",
+        "label": "Dashboard",
+        "icon": "Home",
+        "path": "/dashboard",
+        "adminOnly": false
+    },
+    {
+        "id": "nav-tenant-mgmt",
+        "label": "Tenant Management",
+        "icon": "Users",
+        "path": "/tenants",
+        "adminOnly": true,
+        "children": [
+            {
+                "id": "sub-tenant-list",
+                "label": "All Tenants",
+                "path": "/tenants"
+            },
+            {
+                "id": "sub-tenant-details",
+                "label": "Tenant Details",
+                "path": "/tenants/:id/details"
+            }
+        ]
+    },
+    {
+        "id": "nav-plans-subscription",
+        "label": "Plans & Subscription",
+        "icon": "CreditCard",
+        "path": "/plans",
+        "adminOnly": true,
+        "children": [
+            {
+                "id": "sub-plans-main",
+                "label": "Subscription Plans",
+                "path": "/plans"
+            },
+            {
+                "id": "sub-plans-features",
+                "label": "Feature Domain Management",
+                "path": "/plans/domains"
+            },
+            {
+                "id": "sub-plans-features-assign",
+                "label": "Feature ",
+                "path": "/plans/features"
+            }
+        ]
+    },
+    {
+        "id": "nav-roles-permissions",
+        "label": "Roles & Permissions",
+        "icon": "LayoutGrid",
+        "path": "/roles-permissions",
+        "adminOnly": true,
+        "children": [
+            {
+                "id": "sub-roles-main",
+                "adminOnly": false,
+                "label": "Role Management",
+                "path": "/roles-permissions/roles"
+            },
+            {
+                "id": "sub-Domain-permission",
+                "adminOnly": false,
+                "label": "Domain Permission",
+                "path": "/roles-permissions/domain-permission"
+            },
+            {
+                "id": "sub-permissions-main",
+                "adminOnly": false,
+                "label": "Permission Management",
+                "path": "/roles-permissions/permissions"
+            }
+        ]
+    },
+    {
+        "id": "nav-Role-Based-Access",
+        "label": "Role Based Access",
+        "icon": "LayoutGrid",
+        "path": "/role-based-access",
+        "adminOnly": false,
+        "children": [
+            {
+                "id": "sub-role-based-access-main",
+                "label": "Role Based Access",
+                "path": "/role-based-access/roles",
+                "adminOnly": true
+            }
+        ]
+    },
+    {
+        "id": "nav-staff-management",
+        "label": "Staff Management",
+        "icon": "ShieldCheck",
+        "path": "/staff-management",
+        "adminOnly": true,
+        "children": [
+            {
+                "id": "sub-staff-main",
+                "label": "Staff",
+                "path": "/staff-management/staff"
+            },
+            {
+                "id": "sub-staff-global",
+                "label": "Global Control",
+                "path": "/access/global-control"
+            }
+        ]
+    },
+    {
+        "id": "nav-sidebar-mgmt",
+        "label": "Sidebar Management",
+        "icon": "Users",
+        "path": "/sidebar",
+        "adminOnly": false,
+        "children": [
+            {
+                "id": "sub-sidebar-list",
+                "label": "All Sidebars",
+                "path": "/sidebar"
+            },
+            {
+                "id": "sub-assign-sidebar",
+                "label": "Assign Sidebar",
+                "path": "/sidebar/assign"
+            }
+        ]
+    },
+    {
+        "id": "nav-audit-logs",
+        "label": "Audit Logs",
+        "icon": "ShieldCheck",
+        "path": "/audit-logs",
+        "adminOnly": false,
+        "children": [
+            {
+                "id": "sub-audit-main",
+                "label": "System Logs",
+                "path": "/audit-logs"
+            },
+            {
+                "id": "sub-audit-global",
+                "label": "Global Control",
+                "path": "/access/global-control"
+            }
+        ]
+    }
+]

@@ -1,0 +1,268 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/* ─── Global Dark Theme Reset ─── */
+:root {
+  --neon-green: #00e676;
+  --neon-green-dim: #00c853;
+  --dark-bg: #080d14;
+  --dark-card: #0d1523;
+  --dark-card-hover: #111c2e;
+  --dark-border: #1a2a40;
+  --dark-border-bright: #1e3a52;
+  --text-muted: #557a9a;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--dark-bg);
+  color: #e2e8f0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* ─── Custom Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e3a52;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00e676;
+}
+
+/* ─── Neon Glow Effect ─── */
+.neon-glow {
+  box-shadow: 0 0 20px rgba(0, 230, 118, 0.15), 0 0 40px rgba(0, 230, 118, 0.05);
+}
+
+.neon-text {
+  color: #00e676;
+  text-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
+}
+
+/* ─── Glass Card ─── */
+.glass-card {
+  background: rgba(13, 21, 35, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(26, 42, 64, 0.8);
+  border-radius: 16px;
+}
+
+/* ─── Gradient Text ─── */
+.gradient-text {
+  background: linear-gradient(135deg, #00e676 0%, #00acc1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Chart Glow Line ─── */
+.chart-glow {
+  filter: drop-shadow(0 0 8px rgba(0, 230, 118, 0.6));
+}
+
+/* ─── Status Badge ─── */
+.status-active {
+  background: rgba(0, 230, 118, 0.12);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.25);
+}
+
+.status-inactive {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* ─── Sidebar Active Item Glow ─── */
+.sidebar-active {
+  background: rgba(0, 230, 118, 0.12);
+  color: #00e676;
+  border-left: 3px solid #00e676;
+  box-shadow: inset 0 0 20px rgba(0, 230, 118, 0.05);
+}
+
+/* ─── Animation Keyframes ─── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-green {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 230, 118, 0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.animate-pulse-green {
+  animation: pulse-green 2s infinite;
+}
+
+/* ─── Progress Bar ─── */
+.progress-bar-bg {
+  background: rgba(26, 42, 64, 0.8);
+  border-radius: 999px;
+  overflow: hidden;
+  height: 6px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00e676, #00acc1);
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.4);
+}
+
+/* ─── Metric Card ─── */
+.metric-card {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.3), transparent);
+}
+
+.metric-card:hover {
+  border-color: rgba(0, 230, 118, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 230, 118, 0.05);
+  transform: translateY(-2px);
+}
+
+/* ─── Table Dark Override ─── */
+.dark-table {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.dark-table thead tr {
+  background: rgba(13, 21, 35, 0.6);
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.dark-table tbody tr:hover {
+  background: rgba(0, 230, 118, 0.03);
+}
+
+.dark-table tbody tr {
+  border-bottom: 1px solid rgba(26, 42, 64, 0.5);
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition;
+  }
+
+  .btn-primary {
+    @apply bg-emerald-500 text-white hover:bg-emerald-600;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-700 text-white hover:bg-slate-600;
+  }
+}
+
+/* ─── Global Dark Mode: White/Light BG Override ─── */
+/* Force any remaining light-themed elements to use dark bg */
+.dark .bg-white,
+.dark [class*="bg-white"],
+.dark [class*="bg-slate-50"],
+.dark [class*="bg-slate-100"],
+.dark [class*="bg-gray-50"],
+.dark [class*="bg-gray-100"] {
+  background-color: var(--dark-card) !important;
+}
+
+/* Force all text to be readable in dark mode */
+.dark [class*="text-slate-700"],
+.dark [class*="text-slate-800"],
+.dark [class*="text-slate-900"],
+.dark [class*="text-gray-700"],
+.dark [class*="text-gray-800"],
+.dark [class*="text-gray-900"],
+.dark [class*="text-black"] {
+  color: #cbd5e1 !important;
+}
+
+.dark [class*="text-slate-600"],
+.dark [class*="text-gray-600"] {
+  color: #8bafc7 !important;
+}
+
+.dark [class*="text-slate-500"],
+.dark [class*="text-slate-400"],
+.dark [class*="text-gray-500"],
+.dark [class*="text-gray-400"] {
+  color: #557a9a !important;
+}
+
+/* Dark border overrides */
+.dark [class*="border-slate-100"],
+.dark [class*="border-slate-200"],
+.dark [class*="border-gray-100"],
+.dark [class*="border-gray-200"] {
+  border-color: var(--dark-border) !important;
+}
