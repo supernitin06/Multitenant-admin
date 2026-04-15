@@ -16,7 +16,7 @@ export const authApi = createApi({
 
     register: builder.mutation({
       query: (data) => ({
-        url: "/s-admin-register",
+        url: "/auth",
         method: "POST",
         body: data,
       }),
