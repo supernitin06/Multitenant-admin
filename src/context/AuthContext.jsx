@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { SUPER_ADMIN_API } from "../api/base.api";
 
 /**
  * Platform session (Super Admin or Platform Staff).
@@ -14,7 +15,7 @@ const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-const API_BASE = import.meta.env.VITE_SUPER_ADMIN_API; // e.g. /api/v1/super-admin
+const API_BASE = SUPER_ADMIN_API; // e.g. /api/v1/super-admin or the Render URL
 const API_ROOT = API_BASE.replace(/\/super-admin\/?$/, ""); // e.g. /api/v1
 
 const readStoredUser = () => {

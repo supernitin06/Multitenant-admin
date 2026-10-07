@@ -6,8 +6,12 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const AUTH_MODE = 'TOKEN'; // Changed to TOKEN since API returns token in response
 
 // Base query configuration
+// Deployed backend (Render). Locally .env sets /api/v1/super-admin, which the Vite proxy forwards.
+export const PRODUCTION_SUPER_ADMIN_API = "https://multitenant-uv76.onrender.com/api/v1/super-admin";
+export const SUPER_ADMIN_API = import.meta.env.VITE_SUPER_ADMIN_API || PRODUCTION_SUPER_ADMIN_API;
+
 const getBaseQuery = () => {
-  const baseUrl = import.meta.env.VITE_SUPER_ADMIN_API;
+  const baseUrl = SUPER_ADMIN_API;
 
   if (AUTH_MODE === 'COOKIES') {
     // Cookie-based authentication (recommended)
