@@ -26,7 +26,7 @@ export const dashboardApi = createApi({
 
     // 3. Get Platform Stats
     getPlatformStats: builder.query({
-      query: () => "/summary",
+      query: () => "/dashboard/summary",
     }),
   }),
 });

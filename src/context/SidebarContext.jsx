@@ -35,72 +35,52 @@ export const SidebarProvider = ({ children }) => {
     const [sidebarConfig, setSidebarConfig] = useState([]);
     const [expandedItems, setExpandedItems] = useState(new Set());
 
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, hasPermission, isSuperAdmin } = useAuth();
 
-    // Identify roleId for non-superadmin users
-    const roleId = user?.role?._id || user?.role?.id || user?.roleId;
-    const isSuperAdmin = typeof user?.role === "string" || user?.isSuperAdmin;
+    /*
+     * Who sees what:
+     *  - Super Admin: every section in Data/Sidebar.json.
+     *  - Platform staff: only the sections assigned to their role
+     *    (Sidebar Management → Assign to Roles), and inside those only the
+     *    links their role has the permission for.
+     */
+    const roleId = user?.roleId;
 
     const {
         data: roleSidebarData,
         isLoading: isRoleSidebarLoading,
     } = useGetSidebarbyRoleQuery(
         { roleId },
-        { skip: !roleId || isSuperAdmin }
+        { skip: !user || !roleId || isSuperAdmin }
     );
 
-    /* ---------------- Optimized Sidebar Config ---------------- */
     useEffect(() => {
         if (authLoading) return;
-
-        let finalConfig = [];
-
-        if (isSuperAdmin) {
-            // Superadmin uses local Sidebar.json
-            finalConfig = sidebarData
-                .filter(item => !item.adminOnly || isSuperAdmin)
-                .map(item => ({
-                    ...item,
-                    icon: ICON_MAP[item.icon]
-                }));
-        } else if (roleSidebarData) {
-            // Other roles use data from API
-            const sidebarsFromApi = roleSidebarData.sidebars ||
-                (Array.isArray(roleSidebarData) ? roleSidebarData : (roleSidebarData?.data || []));
-
-            finalConfig = sidebarsFromApi.map(sb => {
-                // Find matching template in local Sidebar.json to get children and correct paths
-                const template = sidebarData.find(t =>
-                    t.label?.toLowerCase() === sb.name?.toLowerCase() ||
-                    t.id?.toLowerCase() === sb.name?.toLowerCase().replace(/\s+/g, '-')
-                );
-
-                if (template) {
-                    return {
-                        ...template,
-                        icon: ICON_MAP[template.icon] || LayoutGrid
-                    };
-                }
-
-                // Fallback if no template found
-                return {
-                    id: sb.id || sb._id,
-                    label: sb.name,
-                    icon: ICON_MAP[sb.icon] || LayoutGrid,
-                    path: sb.path || `/dashboard/${sb.name?.toLowerCase().replace(/\s+/g, '-')}`,
-                    children: sb.children?.map(child => ({
-                        id: child.id || child._id,
-                        label: child.name || child.label,
-                        path: child.path
-                    }))
-                };
-            });
+        if (!user) {
+            setSidebarConfig([]);
+            return;
         }
 
-        setSidebarConfig(finalConfig);
-    }, [user, roleSidebarData, authLoading, isSuperAdmin]);
+        let sections = sidebarData;
 
-    const loading = authLoading || (roleId && !isSuperAdmin && isRoleSidebarLoading);
+        if (!isSuperAdmin) {
+            const assigned = (roleSidebarData?.sidebars || []).map((sb) => sb.name?.trim().toLowerCase());
+            sections = sidebarData.filter((item) => assigned.includes(item.label.toLowerCase()));
+        }
+
+        const finalConfig = sections
+            .map((item) => {
+                const children = item.children?.filter((child) => hasPermission(child.permission));
+                return { ...item, icon: ICON_MAP[item.icon] || LayoutGrid, children };
+            })
+            .filter((item) =>
+                item.children ? item.children.length > 0 : hasPermission(item.permission)
+            );
+
+        setSidebarConfig(finalConfig);
+    }, [user, roleSidebarData, authLoading, isSuperAdmin, hasPermission]);
+
+    const loading = authLoading || (!!roleId && !isSuperAdmin && isRoleSidebarLoading);
 
     const toggleSidebar = useCallback(() => setIsCollapsed((s) => !s), []);
     const closeSidebar = useCallback(() => setIsCollapsed(true), []);

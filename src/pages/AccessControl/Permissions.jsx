@@ -6,8 +6,10 @@ import { useGetPermissionsQuery, useUpdatePermissionsMutation, useDeletePermissi
 import { useGetDomainPermissionsQuery } from "../../api/platform/domainPermission.api";
 import { FiUsers, FiX, FiCheck } from "react-icons/fi";
 import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 
 const Permission = () => {
+    const { hasPermission } = useAuth();
     const { data: permissionsData, isLoading } = useGetPermissionsQuery();
     const permissions = permissionsData?.data || permissionsData?.permissions || [];
 
@@ -21,20 +23,20 @@ const Permission = () => {
     // State for Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPermission, setEditingPermission] = useState(null); // null means creating mode
-    const [formData, setFormData] = useState({ name: "", description: "", domainId: "", key: "" });
+    const [formData, setFormData] = useState({ description: "", domainId: "", key: "" });
 
     const openCreateModal = () => {
         setEditingPermission(null);
-        setFormData({ name: "", description: "", domainId: "", key: "" });
+        setFormData({ description: "", domainId: "", key: "" });
         setIsModalOpen(true);
     };
 
     const openEditModal = (permission) => {
         setEditingPermission(permission);
         setFormData({
-            name: permission.name || "",
             description: permission.description || "",
-            domainId: permission.domainId || "",
+            // a permission can sit in several domains; the form edits the first one
+            domainId: permission.domains?.[0]?.domainId || "",
             key: permission.key || ""
         });
         setIsModalOpen(true);
@@ -43,25 +45,28 @@ const Permission = () => {
     const closeModal = () => {
         setIsModalOpen(false);
         setEditingPermission(null);
-        setFormData({ name: "", description: "", domainId: "", key: "" });
+        setFormData({ description: "", domainId: "", key: "" });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.name || !formData.description || !formData.domainId || !formData.key) {
+        if (!formData.key || !formData.description || !formData.domainId) {
             toast.error("Please fill all the fields");
             return;
         }
 
+        // The API expects a list of domain ids
+        const payload = { key: formData.key, description: formData.description, domainId: [formData.domainId] };
+
         try {
             if (editingPermission) {
                 // UPDATE
-                await updatePermission({ id: editingPermission.id, ...formData }).unwrap();
+                await updatePermission({ id: editingPermission.id, ...payload }).unwrap();
                 toast.success("Permission updated successfully");
             } else {
                 // CREATE
-                await createPermission(formData).unwrap();
+                await createPermission(payload).unwrap();
                 toast.success("Permission created successfully");
             }
             closeModal();
@@ -74,7 +79,7 @@ const Permission = () => {
     };
 
     const handleDelete = async (permission) => {
-        if (!window.confirm(`Delete permission "${permission.name}"?`)) return;
+        if (!window.confirm(`Delete permission "${permission.key}"? Every role that has it will lose it.`)) return;
 
         try {
             await deletePermission(permission.id).unwrap();
@@ -93,7 +98,7 @@ const Permission = () => {
         loadingText: "Loading Permissions...",
         columns: [
             {
-                label: "Permission Name",
+                label: "Permission Key",
                 key: "key",
                 type: "custom",
                 render: (item, value) => (
@@ -103,12 +108,12 @@ const Permission = () => {
                 )
             },
             {
-                label: "ID",
-                key: "id",
+                label: "Domain",
+                key: "domains",
                 type: "custom",
-                render: (item, value) => (
+                render: (item) => (
                     <div className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                        {value}
+                        {item.domains?.map((d) => d.domain?.name).filter(Boolean).join(", ") || "—"}
                     </div>
                 )
             },
@@ -135,9 +140,9 @@ const Permission = () => {
             }
         ],
         actions: [
-            { type: "edit", handler: "onEdit" },
-            { type: "delete", handler: "onDelete" }
-        ]
+            hasPermission("UPDATE_PERMISSION") && { type: "edit", handler: "onEdit" },
+            hasPermission("DELETE_PERMISSION") && { type: "delete", handler: "onDelete" }
+        ].filter(Boolean)
     };
 
     const handlers = {
@@ -149,9 +154,9 @@ const Permission = () => {
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 min-h-screen bg-gray-50/50 dark:bg-gray-900">
             <PermissionsHeader
-                actions={[
+                actions={hasPermission("CREATE_PERMISSION") ? [
                     <CreateButton children="Create Permission" key="create" onClick={openCreateModal} />
-                ]}
+                ] : []}
             />
 
             <GenericTable
@@ -182,17 +187,6 @@ const Permission = () => {
                         <form onSubmit={handleSubmit} className="p-8 space-y-6">
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Permission Name</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-bold text-slate-700 dark:text-white"
-                                        placeholder="e.g. USER_CREATE"
-                                    />
-                                </div>
-                                <div>
                                     <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Key</label>
                                     <input
                                         type="text"
@@ -200,7 +194,7 @@ const Permission = () => {
                                         value={formData.key}
                                         onChange={(e) => setFormData({ ...formData, key: e.target.value })}
                                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-bold text-slate-700 dark:text-white"
-                                        placeholder="e.g. SUPER_ADMIN"
+                                        placeholder="e.g. VIEW_TENANTS"
                                     />
                                 </div>
 
@@ -212,7 +206,7 @@ const Permission = () => {
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-bold text-slate-700 dark:text-white"
-                                        placeholder="e.g. 99"
+                                        placeholder="e.g. View the list of tenants"
                                     />
                                 </div>
 

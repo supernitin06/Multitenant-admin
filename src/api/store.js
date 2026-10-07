@@ -14,6 +14,8 @@ import { domainPermissionApi } from "./platform/domainPermission.api";
 import { permissionApi } from "./platform/permission.api";
 import { staffApi } from "./platform/staff.api"
 import { sidebarApi } from "./platform/sidebar.api"
+import { tenantPermissionApi } from "./platform/tenantPermission.api";
+import { auditLogsApi } from "./Common/auditLogs.api";
 
 // Legacy APIs - need to be recreated or moved to new structure
 // import { modulesApi } from "./modules.api";
@@ -34,6 +36,8 @@ export const store = configureStore({
     [permissionApi.reducerPath]: permissionApi.reducer,
     [staffApi.reducerPath]: staffApi.reducer,
     [sidebarApi.reducerPath]: sidebarApi.reducer,
+    [tenantPermissionApi.reducerPath]: tenantPermissionApi.reducer,
+    [auditLogsApi.reducerPath]: auditLogsApi.reducer,
     // [modulesApi.reducerPath]: modulesApi.reducer,
     // [auditLogsApi.reducerPath]: auditLogsApi.reducer,
   },
@@ -52,6 +56,8 @@ export const store = configureStore({
       permissionApi.middleware,
       staffApi.middleware,
       sidebarApi.middleware,
+      tenantPermissionApi.middleware,
+      auditLogsApi.middleware,
       // modulesApi.middleware,
       // auditLogsApi.middleware,
     ),

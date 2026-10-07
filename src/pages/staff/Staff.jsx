@@ -6,14 +6,17 @@ import { FiUsers, FiX } from 'react-icons/fi';
 import { useGetStaffQuery, useCreateStaffMutation, useUpdateStaffMutation, useDeleteStaffMutation } from '../../api/platform/staff.api';
 import { useGetRolesQuery } from '../../api/platform/role.api';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Staff() {
+    const { user, hasPermission, isSuperAdmin } = useAuth();
 
     // Hooks
     const { data: staffData, isLoading } = useGetStaffQuery();
     const staff = staffData?.staff || [];
     const { data: rolesData } = useGetRolesQuery();
-    const roles = rolesData?.roles || [];
+    // Staff may only hand out roles that rank below their own
+    const roles = (rolesData?.roles || []).filter((r) => isSuperAdmin || r.power < (user?.power ?? 0));
 
     const [createStaff, { isLoading: isCreating }] = useCreateStaffMutation();
     const [updateStaff, { isLoading: isUpdating }] = useUpdateStaffMutation();
@@ -28,12 +31,12 @@ export default function Staff() {
         password: "",
         name: "",
         roleId: "",
-        power: ""
+        isActive: true
     });
 
     const openCreateModal = () => {
         setEditingStaff(null);
-        setFormData({ email: "", password: "", name: "", roleId: "", power: "" });
+        setFormData({ email: "", password: "", name: "", roleId: "", isActive: true });
         setIsModalOpen(true);
     };
 
@@ -46,7 +49,7 @@ export default function Staff() {
             password: "",
             name: staffMember.name || "",
             roleId: staffMember.roleId || "",
-            power: staffMember.power || ""
+            isActive: staffMember.isActive !== false
         });
         setIsModalOpen(true);
     };
@@ -60,7 +63,7 @@ export default function Staff() {
         e.preventDefault();
 
         // Basic validation
-        if (!formData.email || !formData.name || !formData.roleId || !formData.power) {
+        if (!formData.email || !formData.name || !formData.roleId) {
             toast.error("Please fill in all required fields.");
             return;
         }
@@ -72,10 +75,8 @@ export default function Staff() {
         }
 
         try {
-            const payload = {
-                ...formData,
-                power: Number(formData.power)
-            };
+            // Power is not sent: the backend copies it from the selected role
+            const payload = { ...formData };
 
             // If updating and password is empty, remove it from payload so we don't overwrite with empty string
             // (Assumes backend handles "undefined" or missing password as "no change")
@@ -179,7 +180,7 @@ export default function Staff() {
             },
             {
                 label: "Failed Logins",
-                key: "failedLoginAttempts",
+                key: "failedLoginCount",
                 type: "custom",
                 render: (item, value) => (
                     <div className="text-slate-500 dark:text-slate-400 text-xs font-medium text-center">
@@ -189,7 +190,7 @@ export default function Staff() {
             },
             {
                 label: "Last Login",
-                key: "lastLoginAt",
+                key: "lastLogin",
                 type: "custom",
                 render: (item, value) => (
                     <div className="text-slate-400 dark:text-slate-500 text-[10px]">
@@ -199,7 +200,7 @@ export default function Staff() {
             },
             {
                 label: "Last Logout",
-                key: "lastLogoutAt",
+                key: "lastLogout",
                 type: "custom",
                 render: (item, value) => (
                     <div className="text-slate-400 dark:text-slate-500 text-[10px]">
@@ -209,9 +210,9 @@ export default function Staff() {
             }
         ],
         actions: [
-            { type: "edit", handler: "onEdit" },
-            { type: "delete", handler: "onDelete" }
-        ]
+            hasPermission("UPDATE_STAFF") && { type: "edit", handler: "onEdit" },
+            hasPermission("DELETE_STAFF") && { type: "delete", handler: "onDelete" }
+        ].filter(Boolean)
     };
 
     const handlers = {
@@ -223,9 +224,9 @@ export default function Staff() {
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 min-h-screen bg-gray-50/50 dark:bg-gray-900">
             <StaffHeader
-                actions={[
+                actions={hasPermission("CREATE_STAFF") ? [
                     <CreateButton children="Create Staff" key="create" onClick={openCreateModal} />
-                ]}
+                ] : []}
             />
             <GenericTable
                 config={tableConfig}
@@ -301,23 +302,21 @@ export default function Staff() {
                                             <option value="">Select Role...</option>
                                             {roles.map((role) => (
                                                 <option key={role.id} value={role.id}>
-                                                    {role.name}
+                                                    {role.name} (power {role.power})
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Power</label>
-                                        <input
-                                            type="number"
-                                            required
-                                            min="0"
-                                            max="100"
-                                            value={formData.power}
-                                            onChange={(e) => setFormData({ ...formData, power: e.target.value })}
-                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-bold text-slate-700 dark:text-white"
-                                            placeholder="0-100"
-                                        />
+                                        <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Status</label>
+                                        <select
+                                            value={formData.isActive ? "active" : "inactive"}
+                                            onChange={(e) => setFormData({ ...formData, isActive: e.target.value === "active" })}
+                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl focus:border-indigo-500 outline-none transition-all font-bold text-slate-700 dark:text-white"
+                                        >
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive (cannot log in)</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>

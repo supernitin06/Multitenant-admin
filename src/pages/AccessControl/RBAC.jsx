@@ -17,20 +17,26 @@ import {
 } from '../../api/platform/role.api';
 import { useGetDomainPermissionsQuery } from '../../api/platform/domainPermission.api';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
 
 const PermissionManager = () => {
   /* ================= API ================= */
   const { data: rolesData, isLoading: isRolesLoading, refetch: refetchRoles } = useGetRolesQuery();
-  const { data: domainsData, isLoading: isDomainsLoading } =
+  const { data: domainsData, isLoading: isDomainsLoading, refetch: refetchDomains } =
     useGetDomainPermissionsQuery();
+  const { user, hasPermission, isSuperAdmin } = useAuth();
+
+  // Staff can only change roles that rank below them
+  const canEditRole = (role, isAssigned) => {
+    const allowed = isAssigned ? hasPermission('REMOVE_PERMISSION') : hasPermission('ASSIGN_PERMISSIONS');
+    return allowed && (isSuperAdmin || (user?.power ?? 0) > role.power);
+  };
   const [assignPermission] = useAssignRolePermissionMutation();
   const [unassignPermission] = useDeleteRolePermissionMutation();
 
   const roles = rolesData?.data || rolesData?.roles || [];
   const domains = domainsData?.data || domainsData?.domains || [];
 
-  console.log("RBAC Roles:", roles);
-  console.log("RBAC Domains:", domains);
 
   /* ================= STATE ================= */
   const [selectedDomainId, setSelectedDomainId] = useState(null);
@@ -102,7 +108,7 @@ const PermissionManager = () => {
       {/* HEADER */}
       <RoleBaseAccessControl
         actions={[
-          <CreateButton key="refresh" onClick={() => window.location.reload()}>
+          <CreateButton key="refresh" onClick={() => { refetchRoles(); refetchDomains(); }}>
             Refresh
           </CreateButton>
         ]}
@@ -203,6 +209,7 @@ const PermissionManager = () => {
                         <span className="text-[11px] font-bold text-white uppercase">
                           {role.name}
                         </span>
+                        <span className="text-[9px] font-mono text-[#557a9a]">power {role.power}</span>
                       </div>
                     </th>
                   ))}
@@ -230,8 +237,8 @@ const PermissionManager = () => {
                           <LayoutGrid size={12} />
                         </div>
                         <div>
-                          <span className="font-bold text-[11px] text-white uppercase block">
-                            {permission.name}
+                          <span className="font-semibold text-[11px] text-white block">
+                            {permission.description || permission.key}
                           </span>
                           <span className="text-[9px] text-[#2a4060] font-mono">
                             {permission.key}
@@ -244,6 +251,7 @@ const PermissionManager = () => {
                     {roles.map(role => {
                       const active = isPermissionAssigned(role, permission.id);
                       const isToggling = togglingId === `${role.id}-${permission.id}`;
+                      const editable = canEditRole(role, active);
 
                       return (
                         <td
@@ -252,13 +260,14 @@ const PermissionManager = () => {
                           style={{ borderRight: '1px solid rgba(26,42,64,0.3)' }}
                         >
                           <button
-                            disabled={isToggling}
+                            disabled={isToggling || !editable}
+                            title={editable ? undefined : 'You cannot change this role'}
                             onClick={() => handleToggle(role.id, permission.id)}
                             className="relative inline-flex h-6 w-11 rounded-full transition-all"
                             style={{
                               background: active ? '#00e676' : '#1a2a40',
-                              opacity: isToggling ? 0.5 : 1,
-                              cursor: isToggling ? 'not-allowed' : 'pointer',
+                              opacity: isToggling || !editable ? 0.45 : 1,
+                              cursor: isToggling || !editable ? 'not-allowed' : 'pointer',
                               boxShadow: active ? '0 0 12px rgba(0,230,118,0.3)' : 'none',
                             }}
                           >

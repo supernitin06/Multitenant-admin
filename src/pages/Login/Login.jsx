@@ -36,16 +36,13 @@ export default function UnifiedLogin() {
 
     try {
       const loginFn = isAdmin ? adminLoginApi : staffLoginApi;
-      const response = await loginFn({ email, password }).unwrap();
+      const response = await loginFn({ email: email.trim(), password }).unwrap();
 
-      toast.success(`✅ ${isAdmin ? 'SUPER ADMIN' : 'STAFF'} VERIFIED`);
-
-      setTimeout(() => {
-        authLogin(response.user, response.token);
-        navigate("/dashboard");
-      }, 1500);
+      authLogin(response.user, response.token);
+      toast.success(`Welcome, ${response.user?.name || response.user?.email}`);
+      navigate("/dashboard");
     } catch (error) {
-      toast.error(`❌ AUTHENTICATION FAILED`);
+      toast.error(error?.data?.message || "Login failed. Check your email and password.");
     }
   };
 
@@ -104,7 +101,7 @@ export default function UnifiedLogin() {
             {/* ROLE TOGGLE */}
             <div className="flex mb-8 p-1 bg-black/10 rounded-xl w-fit border border-white/5">
               <button onClick={() => setIsAdmin(false)} className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-2 ${!isAdmin ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}>
-                <FiUsers /> Staff Portal
+                <FiUsers /> Platform Staff
               </button>
               <button onClick={() => setIsAdmin(true)} className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-2 ${isAdmin ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}>
                 <FiShield /> Super Admin
@@ -116,7 +113,7 @@ export default function UnifiedLogin() {
                 {isAdmin ? 'SYSTEM' : 'STAFF'} <span style={{ color: current.color }}>{isAdmin ? 'ADMIN' : 'LOGIN'}</span>
               </h1>
               <p className="text-[10px] opacity-60 font-mono mt-3 tracking-[0.4em] uppercase" style={{ color: isLightTheme ? '#64748b' : '#94a3b8' }}>
-                {isAdmin ? 'Multi-Tenant Master Control' : 'Secure Enterprise Gateway'}
+                {isAdmin ? 'Full access to every tenant and setting' : 'Access is limited to what your role allows'}
               </p>
             </div>
 
@@ -124,12 +121,14 @@ export default function UnifiedLogin() {
 
               {/* FIELD 1: EMAIL */}
               <div className="space-y-1">
-                <label className="text-[9px] font-bold uppercase tracking-widest opacity-80 ml-1" style={{ color: current.color }}>Email Identifier</label>
+                <label className="text-[9px] font-bold uppercase tracking-widest opacity-80 ml-1" style={{ color: current.color }}>Email</label>
                 <div className="relative">
                   <FiMail className="absolute left-5 top-1/2 -translate-y-1/2" style={{ color: current.color }} />
                   <input
                     name="email"
                     required
+                    type="email"
+                    autoComplete="username"
                     defaultValue={isAdmin ? "super@erp.com" : "SUDHANSHU@GMAIL.COM"}
                     className="w-full py-5 pl-14 pr-6 bg-black/10 border-2 outline-none transition-all rounded-xl font-bold"
                     style={inputStyle}
@@ -140,13 +139,14 @@ export default function UnifiedLogin() {
 
               {/* FIELD 2: PASSWORD */}
               <div className="space-y-1">
-                <label className="text-[9px] font-bold uppercase tracking-widest opacity-80 ml-1" style={{ color: current.color }}>Access Secret</label>
+                <label className="text-[9px] font-bold uppercase tracking-widest opacity-80 ml-1" style={{ color: current.color }}>Password</label>
                 <div className="relative">
                   <FiLock className="absolute left-5 top-1/2 -translate-y-1/2" style={{ color: current.color }} />
                   <input
                     name="password"
                     required
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     defaultValue="111111"
                     className="w-full py-5 pl-14 pr-14 bg-black/10 border-2 outline-none transition-all rounded-xl font-bold"
                     style={inputStyle}
@@ -167,7 +167,7 @@ export default function UnifiedLogin() {
                 className="w-full py-5 font-black uppercase tracking-widest transition-all text-white rounded-xl shadow-lg flex items-center justify-center gap-3 mt-4"
                 style={{ backgroundColor: current.color }}
               >
-                {isLoading ? "Authenticating..." : isAdmin ? "Authorize Master Session" : "Access Workspace"}
+                {isLoading ? "Signing in..." : "Sign in"}
                 {!isLoading && (isAdmin ? <FiCpu className="animate-pulse" /> : <FiUserCheck />)}
               </motion.button>
             </form>

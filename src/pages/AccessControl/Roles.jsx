@@ -13,8 +13,10 @@ import { useGetPermissionsQuery } from "../../api/platform/permission.api";
 import { FiUsers, FiX, FiCheck, FiPlus, FiShield } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 
 const Role = () => {
+    const { hasPermission } = useAuth();
     const navigate = useNavigate();
     // API Queries/Mutations
     const { data: rolesData, isLoading } = useGetRolesQuery();
@@ -63,8 +65,8 @@ const Role = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.name || !formData.power || !formData.description) {
-            toast.error("Please fill all the fields");
+        if (!formData.name || !formData.power) {
+            toast.error("Role name and power are required");
             return;
         }
 
@@ -162,12 +164,12 @@ const Role = () => {
                 )
             },
             {
-                label: "ID",
-                key: "id",
+                label: "Staff",
+                key: "_count",
                 type: "custom",
-                render: (item, value) => (
-                    <div style={{ color: '#2a4060', fontSize: '10px', fontFamily: 'monospace' }}>
-                        {value}
+                render: (item) => (
+                    <div style={{ color: '#8bafc7', fontSize: '12px' }}>
+                        {item._count?.staffs ?? 0}
                     </div>
                 )
             },
@@ -202,17 +204,18 @@ const Role = () => {
                 render: (role) => (
                     <button
                         onClick={() => navigate("/role-based-access/roles")}
+                        title="Open the permission matrix"
                         className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100 dark:border-indigo-800"
                     >
-                        Assign
+                        {role.permissions?.length ?? 0} granted · Manage
                     </button>
                 )
             }
         ],
         actions: [
-            { type: "edit", handler: "onEdit" },
-            { type: "delete", handler: "onDelete" }
-        ]
+            hasPermission("UPDATE_PLATFORM_ROLE") && { type: "edit", handler: "onEdit" },
+            hasPermission("DELETE_PLATFORM_ROLE") && { type: "delete", handler: "onDelete" }
+        ].filter(Boolean)
     };
 
     const handlers = {
@@ -223,9 +226,9 @@ const Role = () => {
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 min-h-screen" style={{ background: 'transparent' }}>
             <RolesHeader
-                actions={[
+                actions={hasPermission("CREATE_PLATFORM_ROLE") ? [
                     <CreateButton key="create" onClick={openCreateModal} />
-                ]}
+                ] : []}
             />
 
             <GenericTable

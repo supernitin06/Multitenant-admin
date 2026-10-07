@@ -33,7 +33,7 @@ export const sidebarApi = createApi({
                 url: `/platform-sidebar/${roleId}`,
                 method: "GET",
             }),
-            invalidatesTags: ["Sidebar", "Roles"],
+            providesTags: ["Sidebar"],
         }),
 
     }),

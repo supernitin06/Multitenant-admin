@@ -9,6 +9,7 @@ import { useGetTenantsQuery } from "../../api/tenants/tenant.api";
 import { useGetPlansQuery } from "../../api/plans.api";
 import { useGetDomainsQuery } from "../../api/Common/domain.api";
 import { useGetPlatformStatsQuery } from "../../api/dashboard.api.js";
+import { useAuth } from "../../context/AuthContext";
 import GenericTable from "../../components/Common/GenericTable";
 import { tenantsTableConfig } from "../../config/tableConfigs.jsx";
 
@@ -166,10 +167,12 @@ const ActivityItem = ({ time, action, entity, status = "success" }) => (
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export default function Dashboard() {
-    const { data: tenantsData, isLoading: isTenantsLoading } = useGetTenantsQuery();
+    // Only load the widgets this role is allowed to see (avoids 403s for staff)
+    const { hasPermission } = useAuth();
+    const { data: tenantsData, isLoading: isTenantsLoading } = useGetTenantsQuery(undefined, { skip: !hasPermission("VIEW_TENANTS") });
     const { data: plansData } = useGetPlansQuery();
-    const { data: domainsData } = useGetDomainsQuery();
-    const { data: statsData } = useGetPlatformStatsQuery();
+    const { data: domainsData } = useGetDomainsQuery(undefined, { skip: !hasPermission("VIEW_FEATURE_DOMAINS") });
+    const { data: statsData } = useGetPlatformStatsQuery(undefined, { skip: !hasPermission("VIEW_DASHBOARD") });
 
     const tenants = tenantsData?.tenants || [];
     const plansCount = plansData?.plans?.length || 0;

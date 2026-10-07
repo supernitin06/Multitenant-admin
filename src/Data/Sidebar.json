@@ -4,24 +4,19 @@
         "label": "Dashboard",
         "icon": "Home",
         "path": "/dashboard",
-        "adminOnly": false
+        "permission": "VIEW_DASHBOARD"
     },
     {
         "id": "nav-tenant-mgmt",
         "label": "Tenant Management",
         "icon": "Users",
         "path": "/tenants",
-        "adminOnly": true,
         "children": [
             {
                 "id": "sub-tenant-list",
                 "label": "All Tenants",
-                "path": "/tenants"
-            },
-            {
-                "id": "sub-tenant-details",
-                "label": "Tenant Details",
-                "path": "/tenants/:id/details"
+                "path": "/tenants",
+                "permission": "VIEW_TENANTS"
             }
         ]
     },
@@ -30,22 +25,24 @@
         "label": "Plans & Subscription",
         "icon": "CreditCard",
         "path": "/plans",
-        "adminOnly": true,
         "children": [
             {
                 "id": "sub-plans-main",
                 "label": "Subscription Plans",
-                "path": "/plans"
+                "path": "/plans",
+                "permission": "VIEW_SUBSCRIPTIONS"
+            },
+            {
+                "id": "sub-plans-domains",
+                "label": "Feature Domains",
+                "path": "/plans/domains",
+                "permission": "VIEW_FEATURE_DOMAINS"
             },
             {
                 "id": "sub-plans-features",
-                "label": "Feature Domain Management",
-                "path": "/plans/domains"
-            },
-            {
-                "id": "sub-plans-features-assign",
-                "label": "Feature ",
-                "path": "/plans/features"
+                "label": "Features",
+                "path": "/plans/features",
+                "permission": "VIEW_FEATURES"
             }
         ]
     },
@@ -54,78 +51,78 @@
         "label": "Roles & Permissions",
         "icon": "LayoutGrid",
         "path": "/roles-permissions",
-        "adminOnly": true,
         "children": [
             {
                 "id": "sub-roles-main",
-                "adminOnly": false,
-                "label": "Role Management",
-                "path": "/roles-permissions/roles"
-            },
-            {
-                "id": "sub-Domain-permission",
-                "adminOnly": false,
-                "label": "Domain Permission",
-                "path": "/roles-permissions/domain-permission"
+                "label": "Roles",
+                "path": "/roles-permissions/roles",
+                "permission": "VIEW_PLATFORM_ROLES"
             },
             {
                 "id": "sub-permissions-main",
-                "adminOnly": false,
-                "label": "Permission Management",
-                "path": "/roles-permissions/permissions"
+                "label": "Permissions",
+                "path": "/roles-permissions/permissions",
+                "permission": "VIEW_PERMISSIONS"
+            },
+            {
+                "id": "sub-domain-permission",
+                "label": "Permission Domains",
+                "path": "/roles-permissions/domain-permission",
+                "permission": "VIEW_PERMISSION_DOMAINS"
+            },
+            {
+                "id": "sub-tenant-permission-catalog",
+                "label": "Tenant Permission Catalog",
+                "path": "/roles-permissions/tenant-permissions",
+                "permission": "VIEW_TENANT_PERMISSION_CATALOG"
             }
         ]
     },
     {
-        "id": "nav-Role-Based-Access",
+        "id": "nav-role-based-access",
         "label": "Role Based Access",
-        "icon": "LayoutGrid",
+        "icon": "ShieldCheck",
         "path": "/role-based-access",
-        "adminOnly": false,
         "children": [
             {
                 "id": "sub-role-based-access-main",
-                "label": "Role Based Access",
+                "label": "Permission Matrix",
                 "path": "/role-based-access/roles",
-                "adminOnly": true
+                "permission": "VIEW_PLATFORM_ROLES"
             }
         ]
     },
     {
         "id": "nav-staff-management",
         "label": "Staff Management",
-        "icon": "ShieldCheck",
+        "icon": "Users",
         "path": "/staff-management",
-        "adminOnly": true,
         "children": [
             {
                 "id": "sub-staff-main",
-                "label": "Staff",
-                "path": "/staff-management/staff"
-            },
-            {
-                "id": "sub-staff-global",
-                "label": "Global Control",
-                "path": "/access/global-control"
+                "label": "Platform Staff",
+                "path": "/staff-management/staff",
+                "permission": "VIEW_STAFF"
             }
         ]
     },
     {
         "id": "nav-sidebar-mgmt",
         "label": "Sidebar Management",
-        "icon": "Users",
+        "icon": "LayoutGrid",
         "path": "/sidebar",
-        "adminOnly": false,
         "children": [
             {
                 "id": "sub-sidebar-list",
                 "label": "All Sidebars",
-                "path": "/sidebar"
+                "path": "/sidebar",
+                "permission": "VIEW_PLATFORM_SIDEBARS"
             },
             {
                 "id": "sub-assign-sidebar",
-                "label": "Assign Sidebar",
-                "path": "/sidebar/assign"
+                "label": "Assign to Roles",
+                "path": "/sidebar/assign",
+                "permission": "ASSIGN_PLATFORM_SIDEBAR"
             }
         ]
     },
@@ -134,18 +131,6 @@
         "label": "Audit Logs",
         "icon": "ShieldCheck",
         "path": "/audit-logs",
-        "adminOnly": false,
-        "children": [
-            {
-                "id": "sub-audit-main",
-                "label": "System Logs",
-                "path": "/audit-logs"
-            },
-            {
-                "id": "sub-audit-global",
-                "label": "Global Control",
-                "path": "/access/global-control"
-            }
-        ]
+        "permission": "VIEW_AUDIT_LOGS"
     }
 ]
